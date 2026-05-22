@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Levain — Invendus fin de journée</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a1a1a;padding:16px;}
+.app{max-width:800px;margin:0 auto;}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.logo{font-size:22px;font-weight:600;letter-spacing:0.02em;}
+.logo span{font-weight:300;color:#888;}
+.store-tabs{display:flex;gap:8px;}
+.store-btn{padding:10px 22px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#666;font-size:15px;cursor:pointer;}
+.store-btn.active{background:#eee;border-color:#999;color:#1a1a1a;font-weight:500;}
+.auth-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e0ddd5;flex-wrap:wrap;}
+.auth-status{font-size:13px;color:#999;flex:1;min-width:150px;}
+.auth-status.connected{color:#2a7a45;font-weight:500;}
+.btn-auth{padding:9px 18px;border-radius:8px;border:1px solid #4285F4;background:#4285F4;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.btn-auth.disconnect{background:#fff;color:#c0392b;border-color:#c0392b;}
+.date-info{font-size:14px;color:#666;margin-bottom:20px;}
+.famille-block{margin-bottom:28px;}
+.famille-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #ddd;}
+.products-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.product-card{background:#fff;border:1px solid #e0ddd5;border-radius:12px;padding:14px;}
+.product-card.sold-out{border-color:#6dbe8a;background:#f0faf3;}
+.product-name{font-size:15px;font-weight:500;margin-bottom:10px;line-height:1.3;}
+.qty-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.qty-btn{width:46px;height:46px;border-radius:8px;border:1px solid #ddd;background:#f5f4f0;color:#1a1a1a;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;}
+.qty-btn:active{transform:scale(0.94);}
+.qty-val{font-size:26px;font-weight:500;min-width:36px;text-align:center;}
+.sold-out-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#666;font-size:13px;cursor:pointer;}
+.sold-out-toggle.active{background:#f0faf3;border-color:#6dbe8a;color:#2a7a45;font-weight:500;}
+.time-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.time-row label{font-size:13px;color:#666;}
+.time-input{padding:7px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:15px;width:115px;}
+.sold-out-label{font-size:13px;color:#2a7a45;font-weight:500;margin-bottom:4px;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.btn-action{flex:1;min-width:150px;padding:14px 20px;border-radius:8px;font-size:15px;cursor:pointer;border:1px solid #bbb;transition:all 0.15s;}
+.btn-action:active{transform:scale(0.98);}
+.btn-summary{background:#eee;color:#1a1a1a;font-weight:500;}
+.btn-csv{background:#fff;color:#1a1a1a;}
+.btn-drive{background:#34A853;border-color:#34A853;color:#fff;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-drive:disabled{background:#a8d5b5;border-color:#a8d5b5;cursor:not-allowed;}
+.summary-box{background:#f0f0eb;border-radius:12px;padding:16px;margin-top:20px;display:none;}
+.summary-box.visible{display:block;}
+.summary-title{font-size:15px;font-weight:500;margin-bottom:12px;}
+.sum-famille{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 6px;}
+.sum-famille:first-child{margin-top:0;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ddd;font-size:14px;}
+.summary-row:last-child{border-bottom:none;}
+.tag-zero{font-size:12px;padding:3px 10px;border-radius:20px;background:#d4f0de;color:#2a7a45;white-space:nowrap;}
+.tag-qty{font-size:13px;color:#888;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;max-width:90vw;text-align:center;}
+.toast.visible{opacity:1;}
+.toast.success{background:#2a7a45;}
+.toast.error{background:#c0392b;}
+.setup-notice{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#5d4037;line-height:1.6;}
+.setup-notice strong{display:block;margin-bottom:4px;font-size:14px;}
+@media(max-width:500px){.products-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <div class="logo">Levain <span>&middot; invendus</span></div>
+    <div class="store-tabs">
+      <button class="store-btn active" onclick="setStore(0)">Georges Henri</button>
+      <button class="store-btn" onclick="setStore(1)">Stockel</button>
+    </div>
+  </div>
+
+  <div id="setup-notice" class="setup-notice" style="display:none">
+    <strong>&#9888;&#65039; Configuration requise</strong>
+    Remplacez <code>VOTRE_CLIENT_ID</code> dans le fichier HTML par votre Google Client ID.
+    Voir les instructions fournies avec ce fichier.
+  </div>
+
+  <div class="auth-bar">
+    <div class="auth-status" id="auth-status">&#11044; Non connecté à Google Drive</div>
+    <button class="btn-auth" id="auth-btn" onclick="handleAuth()">Se connecter avec Google</button>
+  </div>
+
+  <div class="date-info" id="date-info"></div>
+  <div id="familles-container"></div>
+
+  <div class="actions">
+    <button class="btn-action btn-summary" onclick="showSummary()">Voir le résumé</button>
+    <button class="btn-action btn-csv" onclick="exportCSV()">Exporter CSV</button>
+    <button class="btn-action btn-drive" id="btn-drive" onclick="sendToDrive()" disabled>Envoyer vers Drive</button>
+  </div>
+
+  <div class="summary-box" id="summary-box">
+    <div class="summary-title" id="summary-title"></div>
+    <div id="summary-rows"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// =============================================================================
+// CONFIGURATION — remplacez VOTRE_CLIENT_ID par votre Google OAuth Client ID
+// Obtenir un Client ID : console.cloud.google.com > APIs & Services > Credentials
+// Type : Web application | Origines autorisées : l'URL où ce fichier est hébergé
+// =============================================================================
+const GOOGLE_CLIENT_ID = "717362220359-56s5c2dtu7u1rd7afu3tc4odbu5q599t.apps.googleusercontent.com";
+const SCOPES = "https://www.googleapis.com/auth/drive.file";
+
+// Produits
+const STORES = ["Georges Henri", "Stockel"];
+const FAMILLES = [
+  { name: "Pains", items: ["Grand campagne","Petit campagne","Grand graines","Petit graines","Baguette","Fougasse"] },
+  { name: "Pains spéciaux", items: ["Sechskornbrod","Petit épeautre","Riz-sarrasin","Figues-abricots-noisettes","Noix / Olives","Riz-Choco","Seigle"] },
+  { name: "Viennoiseries", items: ["Croissant","Pain chocolat","Couque aux raisins","Pomponette","Cinnamon roll","Brioche nature","Brioche raisins","Brioche chocolat","Brioche feuilletée","Croissant amandes","Couque suisse"] },
+  { name: "Pâtisserie", items: ["Flan","Cannelés","Tarte fine aux pommes","Carré confiture","Tarte tatin (entière ou quart)","Tarte bourdaloue (entière ou quart)","Tarte fruits rouges (entière ou quart)","Cake vanille","Cake citron","Cake chocolat"] },
+  { name: "Biscuits", items: ["Spéculoos","Sablé","Macaron","Cookie","Financier"] }
+];
+
+let currentStore = 0;
+let data = { 0: initData(), 1: initData() };
+let accessToken = null;
+let tokenClient = null;
+
+function initData() {
+  return FAMILLES.map(f => ({ famille: f.name, items: f.items.map(name => ({ name, qty: 0, soldOut: false, time: "" })) }));
+}
+
+// Auth
+window.onload = function() {
+  if (GOOGLE_CLIENT_ID.startsWith("VOTRE_")) {
+    document.getElementById("setup-notice").style.display = "block";
+  }
+  const tryInit = () => {
+    if (typeof google === "undefined") { setTimeout(tryInit, 500); return; }
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: SCOPES,
+      callback: (response) => {
+        if (response.error) { showToast("Erreur connexion Google : " + response.error, "error"); return; }
+        accessToken = response.access_token;
+        updateAuthUI();
+        showToast("Connecté à Google Drive ✓", "success");
+      }
+    });
+  };
+  tryInit();
+  render();
+};
+
+function handleAuth() {
+  if (accessToken) {
+    google.accounts.oauth2.revoke(accessToken, () => {});
+    accessToken = null; updateAuthUI();
+    showToast("Déconnecté de Google Drive");
+    return;
+  }
+  if (!tokenClient) { showToast("Chargement en cours, réessayez", "error"); return; }
+  tokenClient.requestAccessToken();
+}
+
+function updateAuthUI() {
+  const status = document.getElementById("auth-status");
+  const btn = document.getElementById("auth-btn");
+  const btnD = document.getElementById("btn-drive");
+  if (accessToken) {
+    status.textContent = "⬤ Connecté à Google Drive";
+    status.className = "auth-status connected";
+    btn.textContent = "Se déconnecter";
+    btn.className = "btn-auth disconnect";
+    btnD.disabled = false;
+  } else {
+    status.textContent = "⬤ Non connecté à Google Drive";
+    status.className = "auth-status";
+    btn.textContent = "Se connecter avec Google";
+    btn.className = "btn-auth";
+    btnD.disabled = true;
+  }
+}
+
+// Render
+function setStore(idx) {
+  currentStore = idx;
+  document.querySelectorAll(".store-btn").forEach((b,i) => b.classList.toggle("active", i===idx));
+  render();
+}
+
+function render() {
+  const now = new Date();
+  document.getElementById("date-info").textContent =
+    now.toLocaleDateString("fr-BE", {weekday:"long", day:"numeric", month:"long", year:"numeric"}) + " — " + STORES[currentStore];
+  const container = document.getElementById("familles-container");
+  container.innerHTML = "";
+  data[currentStore].forEach((famille, fi) => {
+    const block = document.createElement("div"); block.className = "famille-block";
+    block.innerHTML = `<div class="famille-title">${famille.famille}</div>`;
+    const grid = document.createElement("div"); grid.className = "products-grid";
+    famille.items.forEach((item, ii) => {
+      const card = document.createElement("div");
+      card.className = "product-card" + (item.soldOut ? " sold-out" : "");
+      card.innerHTML = `<div class="product-name">${item.name}</div>` + (item.soldOut ? `
+        <div class="sold-out-label">Tout vendu</div>
+        <div class="time-row"><label>Dernière vente :</label>
+          <input class="time-input" type="time" value="${item.time}" onchange="setTime(${fi},${ii},this.value)">
+        </div>
+        <button class="sold-out-toggle active" style="margin-top:10px" onclick="toggleSoldOut(${fi},${ii})">Annuler</button>
+      ` : `
+        <div class="qty-row">
+          <button class="qty-btn" onclick="changeQty(${fi},${ii},-1)">−</button>
+          <span class="qty-val">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${fi},${ii},1)">+</button>
+        </div>
+        <button class="sold-out-toggle" onclick="toggleSoldOut(${fi},${ii})">Tout vendu — noter l'heure</button>
+      `);
+      grid.appendChild(card);
+    });
+    block.appendChild(grid); container.appendChild(block);
+  });
+  document.getElementById("summary-box").classList.remove("visible");
+}
+
+function changeQty(fi, ii, delta) {
+  data[currentStore][fi].items[ii].qty = Math.max(0, data[currentStore][fi].items[ii].qty + delta); render();
+}
+function toggleSoldOut(fi, ii) {
+  const item = data[currentStore][fi].items[ii];
+  item.soldOut = !item.soldOut;
+  if (item.soldOut) { item.time = new Date().toTimeString().slice(0,5); item.qty = 0; } else item.time = "";
+  render();
+}
+function setTime(fi, ii, val) { data[currentStore][fi].items[ii].time = val; }
+
+function showSummary() {
+  const now = new Date();
+  document.getElementById("summary-title").textContent =
+    STORES[currentStore] + " — " + now.toLocaleDateString("fr-BE", {day:"numeric", month:"long", year:"numeric"});
+  const rows = document.getElementById("summary-rows"); rows.innerHTML = "";
+  data[currentStore].forEach(famille => {
+    const fT = document.createElement("div"); fT.className = "sum-famille"; fT.textContent = famille.famille; rows.appendChild(fT);
+    famille.items.forEach(item => {
+      const row = document.createElement("div"); row.className = "summary-row";
+      row.innerHTML = item.soldOut
+        ? `<span>${item.name}</span><span class="tag-zero">Tout vendu${item.time?" à "+item.time:""}</span>`
+        : `<span>${item.name}</span><span class="tag-qty">${item.qty} invendu${item.qty!==1?"s":""}</span>`;
+      rows.appendChild(row);
+    });
+  });
+  document.getElementById("summary-box").classList.add("visible");
+  document.getElementById("summary-box").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+// CSV
+function buildCSVRows(si, dateStr) {
+  let r = "";
+  data[si].forEach(f => f.items.forEach(item => {
+    r += `${STORES[si]};${dateStr};${f.famille};${item.name};${item.soldOut?0:item.qty};${item.soldOut?"Oui":"Non"};${item.time||""}\n`;
+  }));
+  return r;
+}
+
+function exportCSV() {
+  const now = new Date();
+  const d = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+  const csv = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n" + buildCSVRows(currentStore, d);
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url;
+  a.download = `invendus_${STORES[currentStore].replace(" ","_")}_${d}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// Google Drive API
+async function driveGet(url) {
+  const res = await fetch(url, {headers:{"Authorization":`Bearer ${accessToken}`}});
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+async function findOrCreateFolder(name, parentId) {
+  const q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
+  const res = await driveGet(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`);
+  if (res.files && res.files.length > 0) return res.files[0].id;
+  const r = await fetch("https://www.googleapis.com/drive/v3/files", {
+    method:"POST", headers:{"Authorization":`Bearer ${accessToken}`,"Content-Type":"application/json"},
+    body: JSON.stringify({name, mimeType:"application/vnd.google-apps.folder", parents:[parentId]})
+  });
+  return (await r.json()).id;
+}
+
+async function findFile(name, folderId) {
+  const q = `name='${name}' and '${folderId}' in parents and trashed=false`;
+  const res = await driveGet(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`);
+  return res.files && res.files.length > 0 ? res.files[0].id : null;
+}
+
+async function readFile(fileId) {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers:{"Authorization":`Bearer ${accessToken}`}
+  });
+  if (!res.ok) return "";
+  const buf = await res.arrayBuffer();
+  return new TextDecoder("utf-8").decode(buf).replace(/^\uFEFF/,"");
+}
+
+async function uploadFile(fileId, folderId, fileName, content) {
+  const blob = new Blob(["\uFEFF"+content], {type:"text/csv;charset=utf-8;"});
+  const meta = fileId ? {name: fileName} : {name: fileName, parents:[folderId]};
+  const form = new FormData();
+  form.append("metadata", new Blob([JSON.stringify(meta)], {type:"application/json"}));
+  form.append("file", blob);
+  const url = fileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+  const res = await fetch(url, {
+    method: fileId ? "PATCH" : "POST",
+    headers:{"Authorization":`Bearer ${accessToken}`},
+    body: form
+  });
+  if (!res.ok) throw new Error(`Upload ${res.status}: ${await res.text()}`);
+}
+
+async function sendToDrive() {
+  if (!accessToken) { showToast("Connectez-vous d'abord à Google Drive", "error"); return; }
+  const btn = document.getElementById("btn-drive");
+  btn.textContent = "Envoi en cours…"; btn.disabled = true;
+  try {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+    const year = now.getFullYear();
+    const storeSlug = STORES[currentStore].replace(" ","_");
+    const fileName = `Invendus_${storeSlug}_${year}.csv`;
+    const header = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n";
+
+    // Créer l'arborescence Levain > Invendus
+    const levainId = await findOrCreateFolder("Levain", "root");
+    const invendusId = await findOrCreateFolder("Invendus", levainId);
+
+    // Lire le fichier existant ou en créer un nouveau
+    const fileId = await findFile(fileName, invendusId);
+    const existing = fileId ? await readFile(fileId) : "";
+    const newRows = buildCSVRows(currentStore, dateStr);
+    const fullContent = existing ? existing + newRows : header + newRows;
+
+    await uploadFile(fileId, invendusId, fileName, fullContent);
+    showToast(`✓ Envoyé vers Google Drive — ${STORES[currentStore]} ${dateStr}`, "success");
+  } catch(e) {
+    console.error(e);
+    if (e.message.includes("401")) {
+      accessToken = null; updateAuthUI();
+      showToast("Session expirée — reconnectez-vous", "error");
+    } else {
+      showToast("Erreur Drive : " + e.message, "error");
+    }
+  } finally {
+    btn.textContent = "Envoyer vers Drive"; btn.disabled = !accessToken;
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast visible"+(type?" "+type:"");
+  setTimeout(() => t.className="toast", 3500);
+}
+</script>
+</body>
+</html>
