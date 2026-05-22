@@ -53,6 +53,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .summary-row:last-child{border-bottom:none;}
 .tag-zero{font-size:12px;padding:3px 10px;border-radius:20px;background:#d4f0de;color:#2a7a45;white-space:nowrap;}
 .tag-qty{font-size:13px;color:#888;}
+.notes-box{background:#fff;border:1px solid #e0ddd5;border-radius:12px;padding:16px;margin-bottom:16px;}
+.notes-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
+.notes-textarea{width:100%;min-height:90px;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;color:#1a1a1a;background:#fafaf8;}
+.notes-textarea:focus{outline:none;border-color:#aaa;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;max-width:90vw;text-align:center;}
 .toast.visible{opacity:1;}
 .toast.success{background:#2a7a45;}
@@ -86,11 +90,17 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
   <div class="date-info" id="date-info"></div>
   <div id="familles-container"></div>
 
+  <div class="notes-box">
+    <div class="notes-label">Notes / Commentaires</div>
+    <textarea id="notes-field" class="notes-textarea" placeholder="Observations du jour, incidents, météo, événements particuliers…"></textarea>
+  </div>
+
   <div class="actions">
     <button class="btn-action btn-summary" onclick="showSummary()">Voir le résumé</button>
     <button class="btn-action btn-csv" onclick="exportCSV()">Exporter CSV</button>
     <button class="btn-action btn-drive" id="btn-drive" onclick="sendToDrive()" disabled>Envoyer vers Drive</button>
   </div>
+
 
   <div class="summary-box" id="summary-box">
     <div class="summary-title" id="summary-title"></div>
@@ -112,10 +122,9 @@ const SCOPES = "https://www.googleapis.com/auth/drive.file";
 const STORES = ["Georges Henri", "Stockel"];
 const FAMILLES = [
   { name: "Pains", items: ["Grand campagne","Petit campagne","Grand graines","Petit graines","Baguette","Fougasse"] },
-  { name: "Pains spéciaux", items: ["Sechskornbrod","Petit épeautre","Riz-sarrasin","Figues-abricots-noisettes","Noix / Olives","Riz-Choco","Seigle"] },
+  { name: "Pains spéciaux", items: ["Sechskornbrod","Petit épeautre","Riz-sarrasin","Figues-abricots-noisettes","Noix / Olives","Riz-Choco","Seigle","Pide carné","Pide végé"] },
   { name: "Viennoiseries", items: ["Croissant","Pain chocolat","Couque aux raisins","Pomponette","Cinnamon roll","Brioche nature","Brioche raisins","Brioche chocolat","Brioche feuilletée","Croissant amandes","Couque suisse"] },
-  { name: "Pâtisserie", items: ["Flan","Cannelés","Tarte fine aux pommes","Carré confiture","Tarte tatin (entière ou quart)","Tarte bourdaloue (entière ou quart)","Tarte fruits rouges (entière ou quart)","Cake vanille","Cake citron","Cake chocolat"] },
-  { name: "Biscuits", items: ["Spéculoos","Sablé","Macaron","Cookie","Financier"] }
+  { name: "Pâtisserie", items: ["Flan","Cannelés","Tarte fine aux pommes","Carré confiture","Tarte tatin (entière ou quart)","Tarte fruits rouges (entière ou quart)","Cake citron","Cake marbré","Tarte pommes rhubarbe","Cookies chocolat noir","Cookies chocolat blanc"] }
 ];
 
 let currentStore = 0;
@@ -170,6 +179,7 @@ function updateAuthUI() {
     btn.textContent = "Se déconnecter";
     btn.className = "btn-auth disconnect";
     btnD.disabled = false;
+    checkAutoWeeklyReport();
   } else {
     status.textContent = "⬤ Non connecté à Google Drive";
     status.className = "auth-status";
@@ -343,6 +353,7 @@ async function sendToDrive() {
     const fullContent = existing ? existing + newRows : header + newRows;
 
     await uploadFile(fileId, invendusId, fileName, fullContent);
+    saveToday();
     showToast(`✓ Envoyé vers Google Drive — ${STORES[currentStore]} ${dateStr}`, "success");
   } catch(e) {
     console.error(e);
@@ -354,6 +365,133 @@ async function sendToDrive() {
     }
   } finally {
     btn.textContent = "Envoyer vers Drive"; btn.disabled = !accessToken;
+  }
+}
+
+// ── Stockage local des journées ───────────────────────────────────────────────
+function saveToday() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+  const key = `levain_${STORES[currentStore].replace(" ","_")}_${dateStr}`;
+  const notes = document.getElementById("notes-field").value;
+  localStorage.setItem(key, JSON.stringify({ date: dateStr, store: STORES[currentStore], data: data[currentStore], notes }));
+}
+
+function getWeekDates() {
+  // Lundi à dimanche de la semaine en cours
+  const now = new Date();
+  const day = now.getDay(); // 0=dim
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-"));
+  }
+  return dates;
+}
+
+function buildWeeklyCSV(storeIdx) {
+  const dates = getWeekDates();
+  const storeSlug = STORES[storeIdx].replace(" ","_");
+
+  // Charger toutes les journées disponibles pour ce magasin cette semaine
+  const dayData = {};
+  dates.forEach(d => {
+    const key = `levain_${storeSlug}_${d}`;
+    const saved = localStorage.getItem(key);
+    if (saved) dayData[d] = JSON.parse(saved);
+  });
+
+  const availDates = dates.filter(d => dayData[d]);
+  if (availDates.length === 0) return null;
+
+  // Entête
+  let csv = `Magasin : ${STORES[storeIdx]}\n`;
+  csv += `Semaine du ${dates[0]} au ${dates[6]}\n\n`;
+  csv += "Famille;Produit;" + availDates.join(";") + "\n";
+
+  // Lignes par famille/produit
+  FAMILLES.forEach(famille => {
+    famille.items.forEach(itemName => {
+      let row = `${famille.name};${itemName}`;
+      availDates.forEach(d => {
+        const dayStore = dayData[d] ? dayData[d].data : null;
+        if (!dayStore) { row += ";-"; return; }
+        const fam = dayStore.find(f => f.famille === famille.name);
+        const item = fam ? fam.items.find(i => i.name === itemName) : null;
+        if (!item) { row += ";-"; }
+        else if (item.soldOut) row += `;Vendu à ${item.time||"?"}`;
+        else row += `;${item.qty}`;
+      });
+      csv += row + "\n";
+    });
+  });
+
+  // Notes
+  const hasNotes = availDates.some(d => dayData[d] && dayData[d].notes);
+  if (hasNotes) {
+    csv += "\nNotes / Commentaires\n";
+    csv += "Date;Notes\n";
+    availDates.forEach(d => {
+      if (dayData[d] && dayData[d].notes) csv += `${d};"${dayData[d].notes.replace(/"/g,'""')}"\n`;
+    });
+  }
+
+  return csv;
+}
+
+async function checkAutoWeeklyReport() {
+  // Déclenche automatiquement le dimanche à partir de 20h
+  const now = new Date();
+  const isSunday = now.getDay() === 0;
+  const isAfter20h = now.getHours() >= 20;
+  if (!isSunday || !isAfter20h || !accessToken) return;
+
+  // Vérifie si le rapport de cette semaine a déjà été envoyé
+  const dates = getWeekDates();
+  const reportKey = `levain_weekly_sent_${dates[0]}`;
+  if (localStorage.getItem(reportKey)) return; // déjà envoyé cette semaine
+
+  // Lance l'envoi pour les deux magasins
+  for (let si = 0; si < STORES.length; si++) {
+    const csv = buildWeeklyCSV(si);
+    if (!csv) continue;
+    try {
+      const storeSlug = STORES[si].replace(" ","_");
+      const fileName = `Rapport_hebdo_${storeSlug}_${dates[0]}_au_${dates[6]}.csv`;
+      const levainId = await findOrCreateFolder("Levain", "root");
+      const hebdoId = await findOrCreateFolder("Rapports hebdo", levainId);
+      const fileId = await findFile(fileName, hebdoId);
+      await uploadFile(fileId, hebdoId, fileName, csv);
+    } catch(e) {
+      console.error("Rapport hebdo auto erreur:", e);
+      return; // Ne pas marquer comme envoyé si erreur
+    }
+  }
+
+  // Marque comme envoyé pour ne pas renvoyer
+  localStorage.setItem(reportKey, "1");
+  showToast("✓ Rapport hebdomadaire envoyé automatiquement vers Drive", "success");
+}
+
+async function sendWeeklyToDrive() {
+  if (!accessToken) { showToast("Connectez-vous d'abord à Google Drive", "error"); return; }
+  try {
+    const csv = buildWeeklyCSV(currentStore);
+    if (!csv) { showToast("Aucune donnée cette semaine pour ce magasin", "error"); return; }
+    const dates = getWeekDates();
+    const storeSlug = STORES[currentStore].replace(" ","_");
+    const fileName = `Rapport_hebdo_${storeSlug}_${dates[0]}_au_${dates[6]}.csv`;
+    const levainId = await findOrCreateFolder("Levain", "root");
+    const hebdoId = await findOrCreateFolder("Rapports hebdo", levainId);
+    const fileId = await findFile(fileName, hebdoId);
+    await uploadFile(fileId, hebdoId, fileName, csv);
+    showToast(`✓ Rapport hebdomadaire envoyé — ${STORES[currentStore]}`, "success");
+  } catch(e) {
+    console.error(e);
+    showToast("Erreur Drive : " + e.message, "error");
   }
 }
 
