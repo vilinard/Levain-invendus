@@ -15,11 +15,16 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .store-tabs{display:flex;gap:8px;}
 .store-btn{padding:10px 22px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#666;font-size:15px;cursor:pointer;}
 .store-btn.active{background:#eee;border-color:#999;color:#1a1a1a;font-weight:500;}
-.auth-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e0ddd5;flex-wrap:wrap;}
+.auth-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e0ddd5;flex-wrap:wrap;}
 .auth-status{font-size:13px;color:#999;flex:1;min-width:150px;}
 .auth-status.connected{color:#2a7a45;font-weight:500;}
-.btn-auth{padding:9px 18px;border-radius:8px;border:1px solid #4285F4;background:#4285F4;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.btn-auth{padding:9px 18px;border-radius:8px;border:1px solid #4285F4;background:#4285F4;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;}
 .btn-auth.disconnect{background:#fff;color:#c0392b;border-color:#c0392b;}
+.pending-bar{display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px;background:#fff8e1;border-radius:10px;border:1px solid #ffe082;font-size:13px;color:#5d4037;}
+.pending-bar.visible{display:flex;}
+.btn-flush{padding:7px 14px;border-radius:8px;border:1px solid #f9a825;background:#f9a825;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;}
+.autosave-bar{font-size:12px;color:#aaa;margin-bottom:16px;text-align:right;}
+.autosave-bar.saved{color:#2a7a45;}
 .date-info{font-size:14px;color:#666;margin-bottom:20px;}
 .famille-block{margin-bottom:28px;}
 .famille-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #ddd;}
@@ -37,12 +42,16 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .time-row label{font-size:13px;color:#666;}
 .time-input{padding:7px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:15px;width:115px;}
 .sold-out-label{font-size:13px;color:#2a7a45;font-weight:500;margin-bottom:4px;}
+.notes-box{background:#fff;border:1px solid #e0ddd5;border-radius:12px;padding:16px;margin-bottom:16px;}
+.notes-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
+.notes-textarea{width:100%;min-height:90px;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;color:#1a1a1a;background:#fafaf8;}
+.notes-textarea:focus{outline:none;border-color:#aaa;}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
 .btn-action{flex:1;min-width:150px;padding:14px 20px;border-radius:8px;font-size:15px;cursor:pointer;border:1px solid #bbb;transition:all 0.15s;}
 .btn-action:active{transform:scale(0.98);}
 .btn-summary{background:#eee;color:#1a1a1a;font-weight:500;}
 .btn-csv{background:#fff;color:#1a1a1a;}
-.btn-drive{background:#34A853;border-color:#34A853;color:#fff;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-drive{background:#34A853;border-color:#34A853;color:#fff;font-weight:500;}
 .btn-drive:disabled{background:#a8d5b5;border-color:#a8d5b5;cursor:not-allowed;}
 .summary-box{background:#f0f0eb;border-radius:12px;padding:16px;margin-top:20px;display:none;}
 .summary-box.visible{display:block;}
@@ -53,16 +62,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .summary-row:last-child{border-bottom:none;}
 .tag-zero{font-size:12px;padding:3px 10px;border-radius:20px;background:#d4f0de;color:#2a7a45;white-space:nowrap;}
 .tag-qty{font-size:13px;color:#888;}
-.notes-box{background:#fff;border:1px solid #e0ddd5;border-radius:12px;padding:16px;margin-bottom:16px;}
-.notes-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
-.notes-textarea{width:100%;min-height:90px;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;color:#1a1a1a;background:#fafaf8;}
-.notes-textarea:focus{outline:none;border-color:#aaa;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;max-width:90vw;text-align:center;}
 .toast.visible{opacity:1;}
 .toast.success{background:#2a7a45;}
 .toast.error{background:#c0392b;}
-.setup-notice{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#5d4037;line-height:1.6;}
-.setup-notice strong{display:block;margin-bottom:4px;font-size:14px;}
+.toast.warning{background:#e65100;}
 @media(max-width:500px){.products-grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -76,23 +80,24 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
     </div>
   </div>
 
-  <div id="setup-notice" class="setup-notice" style="display:none">
-    <strong>&#9888;&#65039; Configuration requise</strong>
-    Remplacez <code>VOTRE_CLIENT_ID</code> dans le fichier HTML par votre Google Client ID.
-    Voir les instructions fournies avec ce fichier.
-  </div>
-
   <div class="auth-bar">
     <div class="auth-status" id="auth-status">&#11044; Non connecté à Google Drive</div>
     <button class="btn-auth" id="auth-btn" onclick="handleAuth()">Se connecter avec Google</button>
   </div>
+
+  <div class="pending-bar" id="pending-bar">
+    <span id="pending-msg">⏳ Envois en attente depuis une session précédente</span>
+    <button class="btn-flush" onclick="flushPendingQueue()">Envoyer maintenant</button>
+  </div>
+
+  <div class="autosave-bar" id="autosave-bar">Sauvegarde automatique active</div>
 
   <div class="date-info" id="date-info"></div>
   <div id="familles-container"></div>
 
   <div class="notes-box">
     <div class="notes-label">Notes / Commentaires</div>
-    <textarea id="notes-field" class="notes-textarea" placeholder="Observations du jour, incidents, météo, événements particuliers…"></textarea>
+    <textarea id="notes-field" class="notes-textarea" placeholder="Observations du jour, incidents, météo, événements particuliers…" oninput="scheduleAutosave()"></textarea>
   </div>
 
   <div class="actions">
@@ -100,7 +105,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
     <button class="btn-action btn-csv" onclick="exportCSV()">Exporter CSV</button>
     <button class="btn-action btn-drive" id="btn-drive" onclick="sendToDrive()" disabled>Envoyer vers Drive</button>
   </div>
-
 
   <div class="summary-box" id="summary-box">
     <div class="summary-title" id="summary-title"></div>
@@ -110,15 +114,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 <div class="toast" id="toast"></div>
 
 <script>
-// =============================================================================
-// CONFIGURATION — remplacez VOTRE_CLIENT_ID par votre Google OAuth Client ID
-// Obtenir un Client ID : console.cloud.google.com > APIs & Services > Credentials
-// Type : Web application | Origines autorisées : l'URL où ce fichier est hébergé
-// =============================================================================
 const GOOGLE_CLIENT_ID = "717362220359-56s5c2dtu7u1rd7afu3tc4odbu5q599t.apps.googleusercontent.com";
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
 
-// Produits
 const STORES = ["Georges Henri", "Stockel"];
 const FAMILLES = [
   { name: "Pains", items: ["Grand campagne","Petit campagne","Grand graines","Petit graines","Baguette","Fougasse","Pain blanc"] },
@@ -131,16 +129,111 @@ let currentStore = 0;
 let data = { 0: initData(), 1: initData() };
 let accessToken = null;
 let tokenClient = null;
+let autosaveTimer = null;
 
 function initData() {
   return FAMILLES.map(f => ({ famille: f.name, items: f.items.map(name => ({ name, qty: 0, soldOut: false, time: "" })) }));
 }
 
-// Auth
-window.onload = function() {
-  if (GOOGLE_CLIENT_ID.startsWith("VOTRE_")) {
-    document.getElementById("setup-notice").style.display = "block";
+// ── Clés localStorage ─────────────────────────────────────────────────────────
+function todayStr() {
+  return new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+}
+function draftKey(si) { return `levain_draft_${STORES[si].replace(" ","_")}_${todayStr()}`; }
+function pendingKey() { return "levain_pending_queue"; }
+
+// ── Sauvegarde automatique locale (toutes les 30s et à chaque action) ─────────
+function scheduleAutosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(autosave, 30000);
+}
+
+function autosave() {
+  for (let si = 0; si < STORES.length; si++) {
+    const notes = si === currentStore ? document.getElementById("notes-field").value : (getDraft(si) ? getDraft(si).notes : "");
+    localStorage.setItem(draftKey(si), JSON.stringify({
+      date: todayStr(), store: STORES[si], data: data[si], notes
+    }));
   }
+  const bar = document.getElementById("autosave-bar");
+  bar.textContent = "✓ Sauvegardé localement à " + new Date().toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
+  bar.className = "autosave-bar saved";
+  setTimeout(() => { bar.textContent = "Sauvegarde automatique active"; bar.className = "autosave-bar"; }, 3000);
+}
+
+function getDraft(si) {
+  const raw = localStorage.getItem(draftKey(si));
+  return raw ? JSON.parse(raw) : null;
+}
+
+function restoreDraft() {
+  // Restaure les données du jour si elles existent en local
+  let restored = false;
+  for (let si = 0; si < STORES.length; si++) {
+    const draft = getDraft(si);
+    if (draft && draft.data) {
+      data[si] = draft.data;
+      if (si === currentStore && draft.notes) {
+        document.getElementById("notes-field").value = draft.notes;
+      }
+      restored = true;
+    }
+  }
+  if (restored) showToast("Données du jour restaurées ✓", "success");
+}
+
+// ── File d'attente des envois en échec ────────────────────────────────────────
+function getPendingQueue() {
+  const raw = localStorage.getItem(pendingKey());
+  return raw ? JSON.parse(raw) : [];
+}
+
+function addToPendingQueue(storeIdx, dateStr, csvContent) {
+  const queue = getPendingQueue();
+  // Remplace l'entrée existante pour ce magasin/date si elle existe
+  const idx = queue.findIndex(e => e.store === storeIdx && e.date === dateStr);
+  const entry = { store: storeIdx, date: dateStr, csv: csvContent };
+  if (idx >= 0) queue[idx] = entry; else queue.push(entry);
+  localStorage.setItem(pendingKey(), JSON.stringify(queue));
+}
+
+function removeFromPendingQueue(storeIdx, dateStr) {
+  const queue = getPendingQueue().filter(e => !(e.store === storeIdx && e.date === dateStr));
+  localStorage.setItem(pendingKey(), JSON.stringify(queue));
+}
+
+function updatePendingBar() {
+  const queue = getPendingQueue();
+  const bar = document.getElementById("pending-bar");
+  const msg = document.getElementById("pending-msg");
+  if (queue.length > 0 && accessToken) {
+    const dates = [...new Set(queue.map(e => e.date))].join(", ");
+    msg.textContent = `⏳ ${queue.length} envoi(s) en attente (${dates})`;
+    bar.classList.add("visible");
+  } else {
+    bar.classList.remove("visible");
+  }
+}
+
+async function flushPendingQueue() {
+  if (!accessToken) { showToast("Connectez-vous d'abord à Google Drive", "error"); return; }
+  const queue = getPendingQueue();
+  if (queue.length === 0) return;
+  let success = 0;
+  for (const entry of queue) {
+    try {
+      await writeAnnualFile(entry.store, entry.date, entry.csv);
+      removeFromPendingQueue(entry.store, entry.date);
+      success++;
+    } catch(e) { console.error("Flush error:", e); }
+  }
+  updatePendingBar();
+  if (success > 0) showToast(`✓ ${success} envoi(s) en attente synchronisés`, "success");
+  else showToast("Echec de synchronisation — réessayez plus tard", "error");
+}
+
+// ── Auth Google ───────────────────────────────────────────────────────────────
+window.onload = function() {
   const tryInit = () => {
     if (typeof google === "undefined") { setTimeout(tryInit, 500); return; }
     tokenClient = google.accounts.oauth2.initTokenClient({
@@ -151,19 +244,22 @@ window.onload = function() {
         accessToken = response.access_token;
         updateAuthUI();
         showToast("Connecté à Google Drive ✓", "success");
+        // Renouvellement automatique du token avant expiration (55 min)
+        setTimeout(() => { if (accessToken) tokenClient.requestAccessToken({prompt:""}); }, 55 * 60 * 1000);
       }
     });
   };
   tryInit();
+  restoreDraft();
   render();
+  // Sauvegarde auto toutes les 30 secondes
+  setInterval(autosave, 30000);
 };
 
 function handleAuth() {
   if (accessToken) {
     google.accounts.oauth2.revoke(accessToken, () => {});
-    accessToken = null; updateAuthUI();
-    showToast("Déconnecté de Google Drive");
-    return;
+    accessToken = null; updateAuthUI(); showToast("Déconnecté de Google Drive"); return;
   }
   if (!tokenClient) { showToast("Chargement en cours, réessayez", "error"); return; }
   tokenClient.requestAccessToken();
@@ -179,6 +275,7 @@ function updateAuthUI() {
     btn.textContent = "Se déconnecter";
     btn.className = "btn-auth disconnect";
     btnD.disabled = false;
+    updatePendingBar();
     checkAutoWeeklyReport();
   } else {
     status.textContent = "⬤ Non connecté à Google Drive";
@@ -186,13 +283,19 @@ function updateAuthUI() {
     btn.textContent = "Se connecter avec Google";
     btn.className = "btn-auth";
     btnD.disabled = true;
+    document.getElementById("pending-bar").classList.remove("visible");
   }
 }
 
-// Render
+// ── Render ────────────────────────────────────────────────────────────────────
 function setStore(idx) {
+  // Sauvegarde le magasin courant avant de changer
+  autosave();
   currentStore = idx;
   document.querySelectorAll(".store-btn").forEach((b,i) => b.classList.toggle("active", i===idx));
+  // Restaure les notes du magasin sélectionné
+  const draft = getDraft(idx);
+  document.getElementById("notes-field").value = draft ? (draft.notes || "") : "";
   render();
 }
 
@@ -231,16 +334,22 @@ function render() {
 }
 
 function changeQty(fi, ii, delta) {
-  data[currentStore][fi].items[ii].qty = Math.max(0, data[currentStore][fi].items[ii].qty + delta); render();
+  data[currentStore][fi].items[ii].qty = Math.max(0, data[currentStore][fi].items[ii].qty + delta);
+  scheduleAutosave(); render();
 }
 function toggleSoldOut(fi, ii) {
   const item = data[currentStore][fi].items[ii];
   item.soldOut = !item.soldOut;
-  if (item.soldOut) { item.time = new Date().toTimeString().slice(0,5); item.qty = 0; } else item.time = "";
-  render();
+  if (item.soldOut) { item.time = new Date().toTimeString().slice(0,5); item.qty = 0; }
+  else item.time = "";
+  scheduleAutosave(); render();
 }
-function setTime(fi, ii, val) { data[currentStore][fi].items[ii].time = val; }
+function setTime(fi, ii, val) {
+  data[currentStore][fi].items[ii].time = val;
+  scheduleAutosave();
+}
 
+// ── Résumé ────────────────────────────────────────────────────────────────────
 function showSummary() {
   const now = new Date();
   document.getElementById("summary-title").textContent =
@@ -260,7 +369,7 @@ function showSummary() {
   document.getElementById("summary-box").scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 
-// CSV
+// ── CSV ───────────────────────────────────────────────────────────────────────
 function buildCSVRows(si, dateStr) {
   let r = "";
   data[si].forEach(f => f.items.forEach(item => {
@@ -270,8 +379,7 @@ function buildCSVRows(si, dateStr) {
 }
 
 function exportCSV() {
-  const now = new Date();
-  const d = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
+  const d = todayStr();
   const csv = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n" + buildCSVRows(currentStore, d);
   const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
   const url = URL.createObjectURL(blob);
@@ -280,7 +388,7 @@ function exportCSV() {
   a.click(); URL.revokeObjectURL(url);
 }
 
-// Google Drive API
+// ── Google Drive API ──────────────────────────────────────────────────────────
 async function driveGet(url) {
   const res = await fetch(url, {headers:{"Authorization":`Bearer ${accessToken}`}});
   if (!res.ok) throw new Error(`${res.status}`);
@@ -330,30 +438,53 @@ async function uploadFile(fileId, folderId, fileName, content) {
   if (!res.ok) throw new Error(`Upload ${res.status}: ${await res.text()}`);
 }
 
+// Écrit dans le fichier annuel en remplaçant les lignes du jour (1 seule entrée/jour/produit)
+async function writeAnnualFile(storeIdx, dateStr, newRows) {
+  const year = dateStr.split("-")[2];
+  const storeSlug = STORES[storeIdx].replace(" ","_");
+  const fileName = `Invendus_${storeSlug}_${year}.csv`;
+  const header = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n";
+
+  const levainId = await findOrCreateFolder("Levain", "root");
+  const invendusId = await findOrCreateFolder("Invendus", levainId);
+  const fileId = await findFile(fileName, invendusId);
+  const existing = fileId ? await readFile(fileId) : "";
+
+  let finalContent = "";
+  if (existing) {
+    // Supprime toutes les lignes existantes pour ce magasin+date
+    const lines = existing.split("\n");
+    const filtered = lines.filter(l => {
+      if (l.startsWith("Magasin;")) return true; // garde l'entête
+      const cols = l.split(";");
+      if (cols.length < 2) return false;
+      // Supprime si même magasin ET même date
+      return !(cols[0].trim() === STORES[storeIdx] && cols[1].trim() === dateStr);
+    });
+    finalContent = filtered.join("\n");
+    if (!finalContent.endsWith("\n")) finalContent += "\n";
+    finalContent += newRows;
+  } else {
+    finalContent = header + newRows;
+  }
+
+  await uploadFile(fileId, invendusId, fileName, finalContent);
+}
+
+// ── Envoi vers Drive ──────────────────────────────────────────────────────────
 async function sendToDrive() {
   if (!accessToken) { showToast("Connectez-vous d'abord à Google Drive", "error"); return; }
   const btn = document.getElementById("btn-drive");
   btn.textContent = "Envoi en cours…"; btn.disabled = true;
+  const dateStr = todayStr();
+  const newRows = buildCSVRows(currentStore, dateStr);
   try {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
-    const year = now.getFullYear();
-    const storeSlug = STORES[currentStore].replace(" ","_");
-    const fileName = `Invendus_${storeSlug}_${year}.csv`;
-    const header = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n";
-
-    // Créer l'arborescence Levain > Invendus
-    const levainId = await findOrCreateFolder("Levain", "root");
-    const invendusId = await findOrCreateFolder("Invendus", levainId);
-
-    // Lire le fichier existant ou en créer un nouveau
-    const fileId = await findFile(fileName, invendusId);
-    const existing = fileId ? await readFile(fileId) : "";
-    const newRows = buildCSVRows(currentStore, dateStr);
-    const fullContent = existing ? existing + newRows : header + newRows;
-
-    await uploadFile(fileId, invendusId, fileName, fullContent);
-    saveToday();
+    await writeAnnualFile(currentStore, dateStr, newRows);
+    // Sauvegarde locale après envoi réussi
+    autosave();
+    // Nettoie la file d'attente pour ce magasin/date si présent
+    removeFromPendingQueue(currentStore, dateStr);
+    updatePendingBar();
     showToast(`✓ Envoyé vers Google Drive — ${STORES[currentStore]} ${dateStr}`, "success");
   } catch(e) {
     console.error(e);
@@ -361,32 +492,24 @@ async function sendToDrive() {
       accessToken = null; updateAuthUI();
       showToast("Session expirée — reconnectez-vous", "error");
     } else {
-      showToast("Erreur Drive : " + e.message, "error");
+      // Mise en file d'attente pour envoi ultérieur
+      addToPendingQueue(currentStore, dateStr, newRows);
+      showToast("Pas de connexion — données sauvegardées localement, envoi automatique dès reconnexion", "warning");
     }
   } finally {
     btn.textContent = "Envoyer vers Drive"; btn.disabled = !accessToken;
   }
 }
 
-// ── Stockage local des journées ───────────────────────────────────────────────
-function saveToday() {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-");
-  const key = `levain_${STORES[currentStore].replace(" ","_")}_${dateStr}`;
-  const notes = document.getElementById("notes-field").value;
-  localStorage.setItem(key, JSON.stringify({ date: dateStr, store: STORES[currentStore], data: data[currentStore], notes }));
-}
-
+// ── Rapport hebdomadaire ──────────────────────────────────────────────────────
 function getWeekDates() {
-  // Lundi à dimanche de la semaine en cours
   const now = new Date();
-  const day = now.getDay(); // 0=dim
+  const day = now.getDay();
   const monday = new Date(now);
   monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
   const dates = [];
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
     dates.push(d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"}).replace(/\//g,"-"));
   }
   return dates;
@@ -395,66 +518,49 @@ function getWeekDates() {
 function buildWeeklyCSV(storeIdx) {
   const dates = getWeekDates();
   const storeSlug = STORES[storeIdx].replace(" ","_");
-
-  // Charger toutes les journées disponibles pour ce magasin cette semaine
   const dayData = {};
   dates.forEach(d => {
-    const key = `levain_${storeSlug}_${d}`;
+    const key = `levain_draft_${storeSlug}_${d}`;
     const saved = localStorage.getItem(key);
     if (saved) dayData[d] = JSON.parse(saved);
   });
-
   const availDates = dates.filter(d => dayData[d]);
   if (availDates.length === 0) return null;
 
-  // Entête
-  let csv = `Magasin : ${STORES[storeIdx]}\n`;
+  let csv = `\uFEFFMagasin : ${STORES[storeIdx]}\n`;
   csv += `Semaine du ${dates[0]} au ${dates[6]}\n\n`;
   csv += "Famille;Produit;" + availDates.join(";") + "\n";
-
-  // Lignes par famille/produit
   FAMILLES.forEach(famille => {
     famille.items.forEach(itemName => {
       let row = `${famille.name};${itemName}`;
       availDates.forEach(d => {
-        const dayStore = dayData[d] ? dayData[d].data : null;
-        if (!dayStore) { row += ";-"; return; }
-        const fam = dayStore.find(f => f.famille === famille.name);
+        const ds = dayData[d] ? dayData[d].data : null;
+        if (!ds) { row += ";—"; return; }
+        const fam = ds.find(f => f.famille === famille.name);
         const item = fam ? fam.items.find(i => i.name === itemName) : null;
-        if (!item) { row += ";-"; }
-        else if (item.soldOut) row += `;Vendu à ${item.time||"?"}`;
+        if (!item) row += ";—";
+        else if (item.soldOut) row += `;Vendu${item.time?" à "+item.time:""}`;
         else row += `;${item.qty}`;
       });
       csv += row + "\n";
     });
   });
-
-  // Notes
   const hasNotes = availDates.some(d => dayData[d] && dayData[d].notes);
   if (hasNotes) {
-    csv += "\nNotes / Commentaires\n";
-    csv += "Date;Notes\n";
+    csv += "\nNotes / Commentaires\nDate;Notes\n";
     availDates.forEach(d => {
       if (dayData[d] && dayData[d].notes) csv += `${d};"${dayData[d].notes.replace(/"/g,'""')}"\n`;
     });
   }
-
   return csv;
 }
 
 async function checkAutoWeeklyReport() {
-  // Déclenche automatiquement le dimanche à partir de 20h
   const now = new Date();
-  const isSunday = now.getDay() === 0;
-  const isAfter20h = now.getHours() >= 20;
-  if (!isSunday || !isAfter20h || !accessToken) return;
-
-  // Vérifie si le rapport de cette semaine a déjà été envoyé
+  if (now.getDay() !== 0 || now.getHours() < 20 || !accessToken) return;
   const dates = getWeekDates();
   const reportKey = `levain_weekly_sent_${dates[0]}`;
-  if (localStorage.getItem(reportKey)) return; // déjà envoyé cette semaine
-
-  // Lance l'envoi pour les deux magasins
+  if (localStorage.getItem(reportKey)) return;
   for (let si = 0; si < STORES.length; si++) {
     const csv = buildWeeklyCSV(si);
     if (!csv) continue;
@@ -465,40 +571,17 @@ async function checkAutoWeeklyReport() {
       const hebdoId = await findOrCreateFolder("Rapports hebdo", levainId);
       const fileId = await findFile(fileName, hebdoId);
       await uploadFile(fileId, hebdoId, fileName, csv);
-    } catch(e) {
-      console.error("Rapport hebdo auto erreur:", e);
-      return; // Ne pas marquer comme envoyé si erreur
-    }
+    } catch(e) { console.error("Rapport hebdo:", e); return; }
   }
-
-  // Marque comme envoyé pour ne pas renvoyer
   localStorage.setItem(reportKey, "1");
-  showToast("✓ Rapport hebdomadaire envoyé automatiquement vers Drive", "success");
+  showToast("✓ Rapport hebdomadaire envoyé automatiquement", "success");
 }
 
-async function sendWeeklyToDrive() {
-  if (!accessToken) { showToast("Connectez-vous d'abord à Google Drive", "error"); return; }
-  try {
-    const csv = buildWeeklyCSV(currentStore);
-    if (!csv) { showToast("Aucune donnée cette semaine pour ce magasin", "error"); return; }
-    const dates = getWeekDates();
-    const storeSlug = STORES[currentStore].replace(" ","_");
-    const fileName = `Rapport_hebdo_${storeSlug}_${dates[0]}_au_${dates[6]}.csv`;
-    const levainId = await findOrCreateFolder("Levain", "root");
-    const hebdoId = await findOrCreateFolder("Rapports hebdo", levainId);
-    const fileId = await findFile(fileName, hebdoId);
-    await uploadFile(fileId, hebdoId, fileName, csv);
-    showToast(`✓ Rapport hebdomadaire envoyé — ${STORES[currentStore]}`, "success");
-  } catch(e) {
-    console.error(e);
-    showToast("Erreur Drive : " + e.message, "error");
-  }
-}
-
+// ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg, type) {
   const t = document.getElementById("toast");
   t.textContent = msg; t.className = "toast visible"+(type?" "+type:"");
-  setTimeout(() => t.className="toast", 3500);
+  setTimeout(() => t.className="toast", 4000);
 }
 </script>
 </body>
