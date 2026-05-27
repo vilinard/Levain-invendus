@@ -35,7 +35,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .qty-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .qty-btn{width:46px;height:46px;border-radius:8px;border:1px solid #ddd;background:#f5f4f0;color:#1a1a1a;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;user-select:none;}
 .qty-btn:active{transform:scale(0.94);}
-.qty-val{font-size:26px;font-weight:500;min-width:36px;text-align:center;}
+.qty-val{font-size:22px;font-weight:500;min-width:52px;text-align:center;border:1px solid #ddd;border-radius:8px;padding:6px 4px;background:#fff;color:#1a1a1a;-moz-appearance:textfield;}
+.qty-val::-webkit-outer-spin-button,.qty-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.qty-val:focus{outline:none;border-color:#999;}
+.new-day-bar{display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px;background:#e8f4fd;border-radius:10px;border:1px solid #90caf9;font-size:13px;color:#1565c0;}
+.new-day-bar.visible{display:flex;}
+.btn-newday{padding:7px 14px;border-radius:8px;border:1px solid #1976d2;background:#1976d2;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;}
 .sold-out-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#666;font-size:13px;cursor:pointer;}
 .sold-out-toggle.active{background:#f0faf3;border-color:#6dbe8a;color:#2a7a45;font-weight:500;}
 .time-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
@@ -90,6 +95,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
     <button class="btn-flush" onclick="flushPendingQueue()">Envoyer maintenant</button>
   </div>
 
+  <div class="new-day-bar" id="new-day-bar">
+    <span>🌅 Nouvelle journée — remettre tous les compteurs à zéro ?</span>
+    <button class="btn-newday" onclick="resetForNewDay()">Oui, nouvelle journée</button>
+  </div>
+
   <div class="autosave-bar" id="autosave-bar">Sauvegarde automatique active</div>
 
   <div class="date-info" id="date-info"></div>
@@ -125,7 +135,9 @@ const FAMILLES = [
   { name: "Pâtisserie", items: ["Flan","Cannelés","Tarte fine aux pommes","Carré confiture","Tarte tatin (entière ou quart)","Tarte fruits rouges (entière ou quart)","Cake citron","Cake marbré","Tarte pommes rhubarbe","Cookies chocolat noir","Cookies chocolat blanc"] }
 ];
 
-let currentStore = 0;
+// Magasin mémorisé sur la tablette (persiste même après redémarrage)
+const STORE_KEY = "levain_home_store";
+let currentStore = parseInt(localStorage.getItem(STORE_KEY) || "0");
 let data = { 0: initData(), 1: initData() };
 let accessToken = null;
 let tokenClient = null;
@@ -250,7 +262,10 @@ window.onload = function() {
     });
   };
   tryInit();
+  // Applique le magasin mémorisé sur cette tablette
+  document.querySelectorAll(".store-btn").forEach((b,i) => b.classList.toggle("active", i===currentStore));
   restoreDraft();
+  checkNewDay();
   render();
   // Sauvegarde auto toutes les 30 secondes
   setInterval(autosave, 30000);
@@ -289,11 +304,10 @@ function updateAuthUI() {
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function setStore(idx) {
-  // Sauvegarde le magasin courant avant de changer
   autosave();
   currentStore = idx;
+  localStorage.setItem(STORE_KEY, idx); // mémorise le magasin sur cette tablette
   document.querySelectorAll(".store-btn").forEach((b,i) => b.classList.toggle("active", i===idx));
-  // Restaure les notes du magasin sélectionné
   const draft = getDraft(idx);
   document.getElementById("notes-field").value = draft ? (draft.notes || "") : "";
   render();
@@ -321,7 +335,7 @@ function render() {
       ` : `
         <div class="qty-row">
           <button class="qty-btn" onclick="changeQty(${fi},${ii},-1)">−</button>
-          <span class="qty-val">${item.qty}</span>
+          <input type="number" class="qty-val" value="${item.qty}" min="0" onchange="setQty(${fi},${ii},this.value)" onclick="this.select()">
           <button class="qty-btn" onclick="changeQty(${fi},${ii},1)">+</button>
         </div>
         <button class="sold-out-toggle" onclick="toggleSoldOut(${fi},${ii})">Tout vendu — noter l'heure</button>
@@ -336,6 +350,37 @@ function render() {
 function changeQty(fi, ii, delta) {
   data[currentStore][fi].items[ii].qty = Math.max(0, data[currentStore][fi].items[ii].qty + delta);
   scheduleAutosave(); render();
+}
+function setQty(fi, ii, val) {
+  const n = parseInt(val);
+  data[currentStore][fi].items[ii].qty = isNaN(n) || n < 0 ? 0 : n;
+  scheduleAutosave();
+}
+function resetForNewDay() {
+  for (let si = 0; si < STORES.length; si++) {
+    data[si] = initData();
+    localStorage.removeItem(draftKey(si));
+  }
+  document.getElementById("notes-field").value = "";
+  document.getElementById("new-day-bar").classList.remove("visible");
+  render();
+  showToast("Tous les compteurs remis à zéro ✓", "success");
+}
+function checkNewDay() {
+  // Affiche le bandeau si des données d'un autre jour sont présentes
+  const today = todayStr();
+  for (let si = 0; si < STORES.length; si++) {
+    const raw = localStorage.getItem(`levain_draft_${STORES[si].replace(" ","_")}_${today}`);
+    if (!raw) {
+      // Vérifie s'il y a des drafts d'une autre journée
+      for (let k in localStorage) {
+        if (k.startsWith(`levain_draft_${STORES[si].replace(" ","_")}_`) && !k.endsWith(today)) {
+          document.getElementById("new-day-bar").classList.add("visible");
+          return;
+        }
+      }
+    }
+  }
 }
 function toggleSoldOut(fi, ii) {
   const item = data[currentStore][fi].items[ii];
