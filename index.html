@@ -38,9 +38,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .qty-val{font-size:22px;font-weight:500;min-width:52px;text-align:center;border:1px solid #ddd;border-radius:8px;padding:6px 4px;background:#fff;color:#1a1a1a;-moz-appearance:textfield;}
 .qty-val::-webkit-outer-spin-button,.qty-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .qty-val:focus{outline:none;border-color:#999;}
-.new-day-bar{display:none;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px;background:#e8f4fd;border-radius:10px;border:1px solid #90caf9;font-size:13px;color:#1565c0;}
-.new-day-bar.visible{display:flex;}
-.btn-newday{padding:7px 14px;border-radius:8px;border:1px solid #1976d2;background:#1976d2;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;}
+
 .sold-out-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#666;font-size:13px;cursor:pointer;}
 .sold-out-toggle.active{background:#f0faf3;border-color:#6dbe8a;color:#2a7a45;font-weight:500;}
 .time-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
@@ -58,6 +56,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
 .btn-csv{background:#fff;color:#1a1a1a;}
 .btn-drive{background:#34A853;border-color:#34A853;color:#fff;font-weight:500;}
 .btn-drive:disabled{background:#a8d5b5;border-color:#a8d5b5;cursor:not-allowed;}
+.btn-reset{background:#fff3e0;border-color:#ffb74d;color:#e65100;font-weight:500;width:100%;}
+
 .summary-box{background:#f0f0eb;border-radius:12px;padding:16px;margin-top:20px;display:none;}
 .summary-box.visible{display:block;}
 .summary-title{font-size:15px;font-weight:500;margin-bottom:12px;}
@@ -95,11 +95,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
     <button class="btn-flush" onclick="flushPendingQueue()">Envoyer maintenant</button>
   </div>
 
-  <div class="new-day-bar" id="new-day-bar">
-    <span>🌅 Nouvelle journée — remettre tous les compteurs à zéro ?</span>
-    <button class="btn-newday" onclick="resetForNewDay()">Oui, nouvelle journée</button>
-  </div>
-
   <div class="autosave-bar" id="autosave-bar">Sauvegarde automatique active</div>
 
   <div class="date-info" id="date-info"></div>
@@ -115,6 +110,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a
     <button class="btn-action btn-csv" onclick="exportCSV()">Exporter CSV</button>
     <button class="btn-action btn-drive" id="btn-drive" onclick="sendToDrive()" disabled>Envoyer vers Drive</button>
   </div>
+  <div class="actions" style="margin-top:8px;">
+  </div>
 
   <div class="summary-box" id="summary-box">
     <div class="summary-title" id="summary-title"></div>
@@ -129,7 +126,7 @@ const SCOPES = "https://www.googleapis.com/auth/drive.file";
 
 const STORES = ["Georges Henri", "Stockel"];
 const FAMILLES = [
-  { name: "Pains", items: ["Grand campagne","Petit campagne","Grand graines","Petit graines","Baguette","Fougasse","Pain blanc"] },
+  { name: "Pains", items: ["Grand campagne","Petit campagne","Grand graines","Petit graines","Baguette","Fougasse","Pain blanc","Ciabatta","Focaccia","Focaccia gorgonzola & poires"] },
   { name: "Pains spéciaux", items: ["Sechskornbrod","Petit épeautre","Riz-sarrasin","Figues-abricots-noisettes","Noix / Olives","Riz-Choco","Seigle","Pide carné","Pide végé","Flûtes raisins noisettes","Borodinsky","Shokupan"] },
   { name: "Viennoiseries", items: ["Croissant","Pain chocolat","Couque aux raisins","Pomponette","Cinnamon roll","Brioche nature","Brioche raisins","Brioche chocolat","Brioche feuilletée","Croissant amandes","Couque suisse","Chouquettes"] },
   { name: "Pâtisserie", items: ["Flan","Cannelés","Tarte fine aux pommes","Carré confiture","Tarte tatin (entière ou quart)","Tarte fruits rouges (entière ou quart)","Cake citron","Cake marbré","Tarte pommes rhubarbe","Cookies chocolat noir","Cookies chocolat blanc"] }
@@ -265,7 +262,6 @@ window.onload = function() {
   // Applique le magasin mémorisé sur cette tablette
   document.querySelectorAll(".store-btn").forEach((b,i) => b.classList.toggle("active", i===currentStore));
   restoreDraft();
-  checkNewDay();
   render();
   // Sauvegarde auto toutes les 30 secondes
   setInterval(autosave, 30000);
@@ -356,32 +352,7 @@ function setQty(fi, ii, val) {
   data[currentStore][fi].items[ii].qty = isNaN(n) || n < 0 ? 0 : n;
   scheduleAutosave();
 }
-function resetForNewDay() {
-  for (let si = 0; si < STORES.length; si++) {
-    data[si] = initData();
-    localStorage.removeItem(draftKey(si));
-  }
-  document.getElementById("notes-field").value = "";
-  document.getElementById("new-day-bar").classList.remove("visible");
-  render();
-  showToast("Tous les compteurs remis à zéro ✓", "success");
-}
-function checkNewDay() {
-  // Affiche le bandeau si des données d'un autre jour sont présentes
-  const today = todayStr();
-  for (let si = 0; si < STORES.length; si++) {
-    const raw = localStorage.getItem(`levain_draft_${STORES[si].replace(" ","_")}_${today}`);
-    if (!raw) {
-      // Vérifie s'il y a des drafts d'une autre journée
-      for (let k in localStorage) {
-        if (k.startsWith(`levain_draft_${STORES[si].replace(" ","_")}_`) && !k.endsWith(today)) {
-          document.getElementById("new-day-bar").classList.add("visible");
-          return;
-        }
-      }
-    }
-  }
-}
+
 function toggleSoldOut(fi, ii) {
   const item = data[currentStore][fi].items[ii];
   item.soldOut = !item.soldOut;
@@ -426,7 +397,7 @@ function buildCSVRows(si, dateStr) {
 function exportCSV() {
   const d = todayStr();
   const csv = "Magasin;Date;Famille;Produit;Invendus;Tout vendu;Heure dernière vente\n" + buildCSVRows(currentStore, d);
-  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+  const blob = new Blob(["﻿"+csv], {type:"text/csv;charset=utf-8;"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a"); a.href = url;
   a.download = `invendus_${STORES[currentStore].replace(" ","_")}_${d}.csv`;
@@ -463,11 +434,11 @@ async function readFile(fileId) {
   });
   if (!res.ok) return "";
   const buf = await res.arrayBuffer();
-  return new TextDecoder("utf-8").decode(buf).replace(/^\uFEFF/,"");
+  return new TextDecoder("utf-8").decode(buf).replace(/^﻿/,"");
 }
 
 async function uploadFile(fileId, folderId, fileName, content) {
-  const blob = new Blob(["\uFEFF"+content], {type:"text/csv;charset=utf-8;"});
+  const blob = new Blob(["﻿"+content], {type:"text/csv;charset=utf-8;"});
   const meta = fileId ? {name: fileName} : {name: fileName, parents:[folderId]};
   const form = new FormData();
   form.append("metadata", new Blob([JSON.stringify(meta)], {type:"application/json"}));
@@ -531,6 +502,20 @@ async function sendToDrive() {
     removeFromPendingQueue(currentStore, dateStr);
     updatePendingBar();
     showToast(`✓ Envoyé vers Google Drive — ${STORES[currentStore]} ${dateStr}`, "success");
+    // Reset auto si heure >= 18h (ou dimanche >= 13h)
+    const nowR = new Date();
+    const hR = nowR.getHours(), minR = nowR.getMinutes();
+    const isDimanche = nowR.getDay() === 0;
+    const heureLimite = isDimanche ? 13 : 18;
+    if (hR > heureLimite || (hR === heureLimite && minR >= 0)) {
+      setTimeout(() => {
+        data[currentStore] = initData();
+        const dk = draftKey(currentStore);
+        localStorage.removeItem(dk);
+        render();
+        showToast("Compteurs remis à zéro pour demain ✓", "success");
+      }, 1500);
+    }
   } catch(e) {
     console.error(e);
     if (e.message.includes("401")) {
@@ -572,7 +557,7 @@ function buildWeeklyCSV(storeIdx) {
   const availDates = dates.filter(d => dayData[d]);
   if (availDates.length === 0) return null;
 
-  let csv = `\uFEFFMagasin : ${STORES[storeIdx]}\n`;
+  let csv = `﻿Magasin : ${STORES[storeIdx]}\n`;
   csv += `Semaine du ${dates[0]} au ${dates[6]}\n\n`;
   csv += "Famille;Produit;" + availDates.join(";") + "\n";
   FAMILLES.forEach(famille => {
